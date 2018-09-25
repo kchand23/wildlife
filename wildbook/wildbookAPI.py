@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Wed Aug 15 15:22:52 2018
@@ -403,7 +402,8 @@ class WildbookAPI:
         # extract the uuid-aid correspondence
         # note: it cannot be extracted from job_result because it contains a mixture of nid and negative aid (when
         # the annotation hasn't already been matched to an nid
-        query_uuid_list = uuid_matched_list.append(uuid_requested)
+        query_uuid_list = [uuid_requested]
+        query_uuid_list.extend(uuid_matched_list)
         query_aid_list = self.get_aid_of_uuid(query_uuid_list)
         map_uuid_to_aid = dict(zip(query_uuid_list, query_aid_list))
 
@@ -442,7 +442,6 @@ class WildbookAPI:
 
     def run_complete_identification_pipeline(self, gid_list, species, match_threshold):
         """
-
         :param gid_list:
         :param species:
         :param match_threshold: a matching will be skipped if the probability of the matching is lower than match_threshold
@@ -475,9 +474,8 @@ class WildbookAPI:
             nid = self.get_nid_of_aid([aid])[0]
             if nid < 0:  # it doesn't have an nid
                 aid_against_list = all_aid_list_species_only.copy()
-                print(aid_against_list)
                 aid_against_list.remove(aid)
-                print("Running ID detection of aid %s against %d annotations" % (aid, len(aid_against_list)))
+                print("\nRunning ID detection of aid %s against %d annotations" % (aid, len(aid_against_list)))
                 self.__run_single_annot_identification(aid, aid_against_list, match_threshold)
 
     def delete_all_identification_data(self):
@@ -487,6 +485,7 @@ class WildbookAPI:
         """
         is_sure = input('Are you sure? [yes/no]')
         if(is_sure == 'yes' or is_sure=='y'):
+            print("Deleting data...")
             all_aid_list = self.get_all_aids()
             self.delete_name(all_aid_list)
             self.delete_nid(all_aid_list)
