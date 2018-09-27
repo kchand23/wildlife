@@ -20,25 +20,30 @@ class WildbookAPI:
         Note: a single NID could correspond to multiple AID (i.e. same animals in different images)
     """
 
-    def __init__(self, domain, verbose=False):
+    def __init__(self, domain, read_only=True, verbose=False):
         # remove backslash at the end of the domain
         while domain.endswith('/'):
             domain = domain[:-1]
         self.domain = domain
+        self.read_only = read_only
         self.verbose = verbose
 
     def __request__(self, method, api, data_dict={}):
         url = self.domain + api
         if method == 'get':
             response = requests.get(url, data=data_dict)
-        elif method == 'post':
-            response = requests.post(url, json=data_dict)
-        elif method == 'put':
-            response = requests.put(url, data=data_dict)
-        elif method == 'delete':
-            response = requests.delete(url, data=data_dict)
         else:
-            raise ValueError
+            self.__stop_if_read_only()
+            if method == 'post':
+                response = requests.post(url, json=data_dict)
+            elif method == 'post_files':
+                response = requests.post(url, files=data_dict)
+            elif method == 'put':
+                response = requests.put(url, data=data_dict)
+            elif method == 'delete':
+                response = requests.delete(url, data=data_dict)
+            else:
+                raise ValueError
 
         response_dict = response.json()
 
@@ -53,11 +58,15 @@ class WildbookAPI:
             print('\t URL      = %r' % url)
             print('\t DATA   = %r' % data_dict)
             print('\n%s\n....' % str(response_dict)[:2000])
-            print('\t METHOD   = %r' % method.__name__)
+            #print('\t METHOD   = %r' % method.__name__)
             print('\t RESPONSE = %s\n\n' % message)
 
         assert response_dict['status']['success']
         return response_dict['response']
+
+    def __stop_if_read_only(self):
+        if self.read_only:
+            raise PermissionError("Set read_only = True when initializing the class")
 
     # DELETE REQUESTS
 
@@ -67,6 +76,7 @@ class WildbookAPI:
         :param aid_list:
         :return:
         """
+        self.__stop_if_read_only
         data_dict = {'aid_list': str(aid_list)}
         return self.__request__('delete', '/api/annot/', data_dict)
 
@@ -92,7 +102,10 @@ class WildbookAPI:
         return self.__request__('get', '/api/annot/')
 
     def get_all_cids(self):
-        return self.__request__('get', '/api/contributor/', dict())
+        # workaround: return self.__request__('get', '/api/contributor/') not working
+        all_gid_list = self.get_all_gids()
+        all_cid_list = list(set(self.get_cid_of_gid(all_gid_list)))
+        return all_cid_list
 
     def get_all_gids(self):
         return self.__request__('get', '/api/image/')
@@ -172,6 +185,13 @@ class WildbookAPI:
     def get_uuid_of_gid(self, gid_list):
         data_dict = {'gid_list': str(gid_list)}
         return self.__request__('get', '/api/image/uuid/', data_dict)
+
+    def get_image_url(self, gid_list):
+        """
+        :param gid: gid of the requested image
+        :return: a public url pointing to the image
+        """
+        return [self.domain + '/api/image/src/%s/' % str(gid) for gid in gid_list]
 
     # PUT REQUEST
 
@@ -267,6 +287,18 @@ class WildbookAPI:
         has_no_annotation = [len(x) == 0 for x in self.get_aid_of_gid(gid_list)]
         gids_with_no_annotations = [gid for gid, cond in zip(gid_list, has_no_annotation) if cond == True]
         return gids_with_no_annotations
+
+    # UPLOAD
+
+    def upload_image(self, image_path):
+        """
+        :param image_path: file path of the image to be uploaded
+        :return: a list of gid of the uploaded image
+        """
+        data_dict = ()
+        with open(image_path, 'rb') as fp:
+            data_dict = {'image': fp.read()}
+        return self.__request__('post_files', '/api/upload/image/', data_dict)
 
     # DETECTION
 
@@ -463,6 +495,7 @@ class WildbookAPI:
 
         # limit matching to only <species>
         all_aid_list_species_only = [aid for aid in aid_list if species_dict[aid] == species]
+        all_aid_list_species_only.reverse()
 
         # retrieve all exemplars and perform identification only against them?
         # requires more client-side management: In fact:
