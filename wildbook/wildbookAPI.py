@@ -6,6 +6,7 @@ Created on Wed Aug 15 15:22:52 2018
 """
 
 import requests
+import shutil
 import time
 import json
 
@@ -21,6 +22,12 @@ class WildbookAPI:
     """
 
     def __init__(self, domain, read_only=True, verbose=False):
+        """
+        :param domain: url address of the IBEIS instance in the form http://<name>.xxx
+        :param read_only: set to false only if you want to edit/upload data on the server
+                            if true, it prevents you to mistakenly edit/delete data on the server
+        :param verbose: set to true for debugging requests
+        """
         # remove backslash at the end of the domain
         while domain.endswith('/'):
             domain = domain[:-1]
@@ -162,6 +169,10 @@ class WildbookAPI:
         data_dict = {'nid_list': str(nid_list)}
         return self.__request__('get', '/api/name/image/rowid/', data_dict)
 
+    def get_interest_of_aid(self, aid_list):
+        data_dict = {'aid_list': str(aid_list)}
+        return self.__request__('get', '/api/annot/interest/', data_dict)
+
     def get_job(self, job_id):
         data_dict = {'jobid': job_id}
         return self.__request__('get', '/api/engine/job/result/', data_dict)
@@ -169,6 +180,10 @@ class WildbookAPI:
     def get_name_of_aid(self, aid_list):
         data_dict = {'aid_list': str(aid_list)}
         return self.__request__('get', '/api/annot/name/text/', data_dict)
+
+    def get_orientation_of_gid(self, gid_list):
+        data_dict = {'gid_list': str(gid_list)}
+        return self.__request__('get', '/api/image/orientation/str/', data_dict)
 
     def get_nid_of_aid(self, aid_list):
         data_dict = {'aid_list': str(aid_list)}
@@ -178,13 +193,37 @@ class WildbookAPI:
         data_dict = {'aid_list': str(aid_list)}
         return self.__request__('get', '/api/annot/species/', data_dict)
 
-    def get_theta(self, aid_list):
+    def get_age_of_aid(self, aid_list):
+        data_dict = {'aid_list': str(aid_list)}
+        return self.__request__('get', '/api/annot/age/months/text/', data_dict)
+
+    def get_sex_of_aid(self, aid_list):
+        data_dict = {'aid_list': str(aid_list)}
+        return self.__request__('get', '/api/annot/sex/text/', data_dict)
+
+    def get_theta_of_aid(self, aid_list):
         data_dict = {'aid_list': str(aid_list)}
         return self.__request__('get', '/api/annot/theta/', data_dict)
+
+    def get_quality_of_aid(self, aid_list):
+        data_dict = {'aid_list': str(aid_list)}
+        return self.__request__('get', '/api/annot/quality/text/', data_dict)
 
     def get_uuid_of_gid(self, gid_list):
         data_dict = {'gid_list': str(gid_list)}
         return self.__request__('get', '/api/image/uuid/', data_dict)
+
+    def get_viewpoint_of_aid(self, aid_list):
+        data_dict = {'aid_list': str(aid_list)}
+        return self.__request__('get', '/api/annot/viewpoint/', data_dict)
+
+    def get_unixtime_of_aid(self, aid_list):
+        data_dict = {'aid_list': str(aid_list)}
+        return self.__request__('get', '/api/annot/image/unixtime/', data_dict)
+
+    def get_unixtime_of_gid(self, gid_list):
+        data_dict = {'gid_list': str(gid_list)}
+        return self.__request__('get', '/api/image/unixtime/', data_dict)
 
     def get_image_url(self, gid_list):
         """
@@ -288,7 +327,7 @@ class WildbookAPI:
         gids_with_no_annotations = [gid for gid, cond in zip(gid_list, has_no_annotation) if cond == True]
         return gids_with_no_annotations
 
-    # UPLOAD
+    # UPLOAD AND DOWNLOAD IMAGES
 
     def upload_image(self, image_path):
         """
@@ -300,6 +339,14 @@ class WildbookAPI:
             data_dict = {'image': fp.read()}
         return self.__request__('post_files', '/api/upload/image/', data_dict)
 
+    def download_image(self, gid, file_path):
+        url = self.get_image_url([gid])[0]
+        response = requests.get(url, stream=True)
+        with open(file_path, 'wb') as out_file:
+            shutil.copyfileobj(response.raw, out_file)
+        del response
+
+
     # DETECTION
 
     def __detect(self, image_uuid_list):
@@ -309,59 +356,6 @@ class WildbookAPI:
         # Detection without engine (i.e. blocking --> do not use it!)
         # return self.__request__('post','/api/detect/cnn/yolo/json/',data_dict)
         return job_id
-
-    """def draw_boxes_on_thumbnails(self, job_id_list):
-        ""
-        Before calling this function you must run the detection and wait for 
-        their completion.
-        This function draw boxes around the animals detected so that results
-        can be easier checked on the web interface.
-        ""
-        aid_lists = []
-        for job_id in job_id_list:
-            # extract information about each aid from results
-            detections_list = self.get_job(job_id)['json_result']['results_list'][0]
-            # add annotations based on detection results
-            gid_list = [gid] * len(detection_list)
-            bbox_list = [(detection['xtl'],detection['ytl'],detection['width'],detection['height']) for detection in detection_list]
-            theta_list = [detection['theta'] for detection in detection_list]
-            species_list = [detection['class'] for detection in detection_list]
-            confidence_list = [detection['confidence'] for detection in detection_list]
-            data_dict = {
-                'gid_list': gid_list,
-                'bbox_list': bbox_list,
-                'theta_list': theta_list,
-                'species_list': species_list,
-                'confidence_list': confidence_list,
-            }
-            aid_list = self.__request__('post', '/api/annot/', data_dict)
-            aid_lists.append(aid_list)
-        return aid_lists"""
-
-    """def draw_boxes_on_thumbnails(self):
-        ""
-        Before calling this function you must run the detection and wait for 
-        their completion.
-        This function draw boxes around the animals detected so that results
-        can be easier checked on the web interface.
-        ""
-        aid_list = self.get_all_aids()
-        bbox_list = [(x[0],x[1],x[2],x[3]) for x in self.get_bbox_of_aid(aid_list)]
-        #theta_list = self.get_theta(aid_list)
-        #species_list = self.get_species(aid_list)
-        #confidence_list = self.get_confidence(aid_list)
-        
-        data_dict = {
-                'gid_list': gid_list,
-                'bbox_list': bbox_list,
-         #       'theta_list': theta_list,
-         #       'species_list': species_list,
-         #       'confidence_list': confidence_list,
-            }
-        
-        aid_list = self.__request__('post', '/api/annot/', data_dict)
-
-        return data_dict"""
 
     def run_complete_detection_pipeline(self, fast=True, start_from_gid=0, group_size=12):
         """
