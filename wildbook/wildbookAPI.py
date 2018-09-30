@@ -204,7 +204,7 @@ class WildbookAPI:
         data_dict = {'aid_list': str(aid_list)}
         return self.__request__('get', '/api/annot/sex/text/', data_dict)
 
-    def get_size_of_image(self, gid_list):
+    def get_size_of_gid(self, gid_list):
         data_dict = {'gid_list': str(gid_list)}
         return self.__request__('get', '/api/image/size/', data_dict)
 
