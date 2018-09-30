@@ -75,6 +75,9 @@ class WildbookAPI:
         if self.read_only:
             raise PermissionError("Set read_only = True when initializing the class")
 
+    def get_ibeis_domain(self):
+        return self.domain
+
     # DELETE REQUESTS
 
     def delete_aid(self, aid_list):
@@ -200,6 +203,10 @@ class WildbookAPI:
     def get_sex_of_aid(self, aid_list):
         data_dict = {'aid_list': str(aid_list)}
         return self.__request__('get', '/api/annot/sex/text/', data_dict)
+
+    def get_size_of_image(self, gid_list):
+        data_dict = {'gid_list': str(gid_list)}
+        return self.__request__('get', '/api/image/size/', data_dict)
 
     def get_theta_of_aid(self, aid_list):
         data_dict = {'aid_list': str(aid_list)}
