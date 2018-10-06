@@ -1,3 +1,5 @@
 .DS_store
 settings.py
-credentials.xml
+mturk.json
+test.py
+mturk/trash/*
