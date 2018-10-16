@@ -39,7 +39,7 @@ class Photo:
         self.locationX = locationX
         self.locationY = locationY
         self.location = (locationX, locationY)
-        self.timeTaken = timeTaken if not(timeTaken == -1) else datetime.strptime(photo_info['photo']['dates']['taken'], '%Y-%m-%d %H:%M:%S').strftime("%s") #unix timestamp
+        self.timeTaken = timeTaken if not(timeTaken == -1) else time.mktime(datetime.strptime(photo_info['photo']['dates']['taken'], '%Y-%m-%d %H:%M:%S').timetuple()) #unix timestamp
         self.timePosted = timePosted if not(timePosted == -1) else photo_info['photo']['dates']['posted'] #unix timestamp
         self.timeDifference = timeTaken - timePosted
         self.photographer = photographer if not(photographer == "") else photo_info['photo']['owner']['nsid'] #nsid
