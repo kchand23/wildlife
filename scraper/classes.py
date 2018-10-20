@@ -2,6 +2,7 @@
 import flickrapi, time, json
 from datetime import datetime, tzinfo
 
+
 key = "6ab5883201c84be19c9ceb0a4f5ba959"
 secret = "1d2bcde87f98ed92"
 flickrObj = flickrapi.FlickrAPI(key,secret, format = "json")
@@ -32,10 +33,9 @@ class Album:
         file.write("'" + str( round(self.time_range_taken/60/60/24, 5)   ) +'"'+ ',')
 
 class Photo:
-    def __init__(self, pos = -1, url = "", geotagged = False, photographer = "", tags = "", photo_description = "", locationX = -1, locationY = -1, timeTaken = -1, timePosted = -1, photoIfZoo = False, photoId = "", albumId = ""  ):
+    def __init__(self,photo_info = {}, pos = -1, url = "", geotagged = False, photographer = "", tags = "", photo_description = "", locationX = -1, locationY = -1, timeTaken = -1, timePosted = -1, photoIfZoo = False, photoId = "", albumId = ""  ):
         self.id = photoId
-        photo_info = json.loads(flickrObj.photos.getInfo(photo_id = self.id).decode(encoding='utf-8'))
-        all_contexts = json.loads(flickrObj.photos.getAllContexts(photo_id = self.id).decode(encoding='utf-8'))
+
         self.locationX = locationX
         self.locationY = locationY
         self.location = (locationX, locationY)
@@ -44,7 +44,7 @@ class Photo:
         self.timeDifference = timeTaken - timePosted
         self.photographer = photographer if not(photographer == "") else photo_info['photo']['owner']['nsid'] #nsid
         self.photoIfZoo = False
-        self.albumId = albumId if not(albumId == "") else ("" if not('set' in all_contexts) else all_contexts['set'][0]['id'])
+        self.albumId = ""
         self.pos = pos if not(pos == -1) else self.get_pos() #position in album (1 indexed)
         self.url = url
         self.photo_description = photo_description

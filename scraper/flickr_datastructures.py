@@ -106,6 +106,99 @@ def get_userdict():
     return user_dict
 
 
+def get_album_details(set_id,user):
+
+    # gets list of pictuers in the album
+
+    photosets = json.loads(
+        flickrObj.photosets.getPhotos(photoset_id=set_id, user_id=user).decode(encoding='utf-8'))
+    # creates album object we are analyzing and sets the album id, album url, and album name
+    newalbum = Album(set_id, user_id=user)
+    add_album_url(newalbum)
+    albumName = photosets['photoset']['title']
+    newalbum.name = albumName
+
+    # initializes minimum and maximum posted/taken time
+
+    """first_posted = json.loads(
+        flickrObj.photos.getInfo(photo_id=photosets['photoset']['photo'][0]['id']).decode(
+            encoding='utf-8'))['photo']['dates']['posted']
+    first_taken = json.loads(
+        flickrObj.photos.getInfo(photo_id=photosets['photoset']['photo'][0]['id']).decode(
+            encoding='utf-8'))['photo']['dates']['taken']"""
+    # converts the text time into unix timestamp
+    mint = 1577840461  # 01/01/2020
+    maxt = 915152461  # 01/01/1990
+    minp = 1577840461
+    maxp = 915152461
+
+    # counter in loop which counts number of pictures in album
+    album_size = 0
+    # number of pictures of species of interest in the album
+    num_species = 0
+
+    # loops through each picture in the photoset creatingi a photo class object for each image
+    print(len(photosets['photoset']['photo']))
+    count = 1
+    for j in photosets['photoset']['photo']:
+        start = time.time()
+        # print( str(count) + " " + j['id'])
+        count += 1
+
+        photoInfo = json.loads(flickrObj.photos.getInfo(photo_id=j['id']).decode(encoding='utf-8'))
+
+        newphoto = Photo(photo_info=photoInfo)
+        newphoto.albumId = set_id
+        # add_photo_url(newphoto)
+        newphoto.url = photoInfo['photo']['urls']['url'][0]['_content']
+        newphoto.photo_description = photoInfo['photo']['description']['_content']
+        # add_photo_description(newphoto)
+        # add_photo_location(newphoto)
+
+        '''
+            NEED TO BE DONE:
+            make photo_list a list of photo objects (appending newphoto ) instead of a
+            list of photo ids, which it currently is
+
+            see: line 177
+            '''
+
+        taken = photoInfo['photo']['dates']['taken']
+        # converts the text time into unix timestamp
+        taken = datetime.strptime(taken, '%Y-%m-%d %H:%M:%S')
+        # print(type(taken))
+        taken = int(time.mktime(taken.timetuple()))
+        posted = int(photoInfo['photo']['dates']['posted'])
+        # posted = int(time.mktime(datetime.strptime(posted, '%Y-%m-%d %H:%M:%S').timetuple()))
+        # resets the max/min time if its later/earlier respectively
+        if taken < mint:
+            mint = taken
+        if taken > maxt:
+            maxt = taken
+        if posted < minp:
+            minp = posted
+        if posted > maxp:
+            maxp = posted
+        # adds the photo to the photolist attribute of the album object
+        newalbum.photo_list.append(j['id'])
+
+        album_size += 1
+        stop = time.time()
+        duration = stop - start
+        print(duration)
+        # checks to see if picture has tag of species of interest and updates the count
+        # if j['id'] in photolist :
+        #    num_species+=1
+        newalbum.time_range_posted = int(maxp) - int(minp)
+        newalbum.time_range_taken = int(maxt) - int(mint)
+        # updates album size
+        newalbum.size = album_size
+        # calculates species of interest ratio to total number of photos in album
+        # newalbum.species_ratio = float(num_species)/float(album_size)
+
+    return newalbum
+
+
 # creates a list of albums that
 def get_albums():
     startTime = time.time()
@@ -115,117 +208,28 @@ def get_albums():
     albumlist = {}  # {album id: album object}
 
     # loops through all the photos in the search
-    # for pid in photolist:
+    for pid in photolist:
 
-    for i in range(0, 1):
-
-        pid = photolist[i]
+    # for i in range(0, 1):
+    #
+    #     pid = photolist[i]
 
         all_contexts = json.loads(flickrObj.photos.getAllContexts(photo_id=pid).decode(encoding='utf-8'))
         print(len(all_contexts))
         # list of all set ids
         if 'set' in all_contexts:  # all_contexts["set"] == True
             sets = all_contexts["set"]
-
+            user = \
+                json.loads(flickrObj.photos.getInfo(photo_id=pid).decode(encoding='utf-8'))['photo']['owner'][
+                    'nsid']
             # loops through all the sets that the photo is in
             for i in sets:
                 set_id = i["id"]
                 # if the album has not already been processed
                 if set_id not in albumlist:
-                    # gets the userid for the owner of the album
-                    user = \
-                        json.loads(flickrObj.photos.getInfo(photo_id=pid).decode(encoding='utf-8'))['photo']['owner'][
-                            'nsid']
-                    # gets list of pictuers in the album
-
-                    photosets = json.loads(
-                        flickrObj.photosets.getPhotos(photoset_id=set_id, user_id=user).decode(encoding='utf-8'))
-                    # creates album object we are analyzing and sets the album id, album url, and album name
-                    newalbum = Album(set_id, user_id=user)
-                    add_album_url(newalbum)
-                    albumName = photosets['photoset']['title']
-                    newalbum.name = albumName
-
-                    # initializes minimum and maximum posted/taken time
-
-                    """first_posted = json.loads(
-                        flickrObj.photos.getInfo(photo_id=photosets['photoset']['photo'][0]['id']).decode(
-                            encoding='utf-8'))['photo']['dates']['posted']
-                    first_taken = json.loads(
-                        flickrObj.photos.getInfo(photo_id=photosets['photoset']['photo'][0]['id']).decode(
-                            encoding='utf-8'))['photo']['dates']['taken']"""
-                    # converts the text time into unix timestamp
-                    mint = 1577840461  # 01/01/2020
-                    maxt = 915152461  # 01/01/1990
-                    minp = 1577840461
-                    maxp = 915152461
-
-                    # counter in loop which counts number of pictures in album
-                    album_size = 0
-                    # number of pictures of species of interest in the album
-                    num_species = 0
-
-                    # loops through each picture in the photoset creatingi a photo class object for each image
-                    print(len(photosets['photoset']['photo']))
-                    count = 1
-                    for j in photosets['photoset']['photo']:
-                        start = time.time()
-                        #print( str(count) + " " + j['id'])
-                        count += 1
-                        newphoto = Photo(photoId=j['id'])
-                        photoInfo = json.loads(flickrObj.photos.getInfo(photo_id=j['id']).decode(encoding='utf-8'))
-                        #add_photo_url(newphoto)
-                        newphoto.url = photoInfo['photo']['urls']['url'][0]['_content']
-                        newphoto.photo_description = photoInfo['photo']['description']['_content']
-                        #add_photo_description(newphoto)
-                        # add_photo_location(newphoto)
-
-                        '''
-                            NEED TO BE DONE:
-                            make photo_list a list of photo objects (appending newphoto ) instead of a
-                            list of photo ids, which it currently is
-                            
-                            see: line 177
-                            '''
-
-                        taken = photoInfo['photo']['dates']['taken']
-                        # converts the text time into unix timestamp
-                        taken = datetime.strptime(taken, '%Y-%m-%d %H:%M:%S')
-                        # print(type(taken))
-                        taken = int(time.mktime(taken.timetuple()))
-                        posted = int(photoInfo['photo']['dates']['posted'])
-                        # posted = int(time.mktime(datetime.strptime(posted, '%Y-%m-%d %H:%M:%S').timetuple()))
-                        # resets the max/min time if its later/earlier respectively
-                        if taken < mint:
-                            mint = taken
-                        if taken > maxt:
-                            maxt = taken
-                        if posted < minp:
-                            minp = posted
-                        if posted > maxp:
-                            maxp = posted
-                        # adds the photo to the photolist attribute of the album object
-                        newalbum.photo_list.append(j['id'])
-
-                        album_size += 1
-                        stop = time.time()
-                        duration = stop - start
-                        print(duration)
-                        # checks to see if picture has tag of species of interest and updates the count
-                        # if j['id'] in photolist :
-                        #    num_species+=1
-
-                # calculates the time range the album has for taken/posted
-                newalbum.time_range_posted = int(maxp) - int(minp)
-                newalbum.time_range_taken = int(maxt) - int(mint)
-                # updates album size
-                newalbum.size = album_size
-                # calculates species of interest ratio to total number of photos in album
-                # newalbum.species_ratio = float(num_species)/float(album_size)
-
-                # adds the album to the albumlist
+                    newalbum = get_album_details(set_id,user)
+                    print(newalbum.photo_list)
                 albumlist[newalbum.sid] = newalbum
-
             print(albumlist)
         stopTime = time.time()
         duration = stopTime - startTime
