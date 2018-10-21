@@ -144,9 +144,13 @@ def get_album_details(set_id,user):
         start = time.time()
         # print( str(count) + " " + j['id'])
         count += 1
-
-        photoInfo = json.loads(flickrObj.photos.getInfo(photo_id=j['id']).decode(encoding='utf-8'))
-
+        try:
+            photoInfo = json.loads(flickrObj.photos.getInfo(photo_id=j['id']).decode(encoding='utf-8'))
+        except:
+            time.sleep(10)
+            photoInfo = json.loads(flickrObj.photos.getInfo(photo_id=j['id']).decode(encoding='utf-8'))
+        if "photo" not in photoInfo:
+            continue
         newphoto = Photo(photo_info=photoInfo)
         newphoto.albumId = set_id
         # add_photo_url(newphoto)
@@ -208,11 +212,11 @@ def get_albums():
     albumlist = {}  # {album id: album object}
 
     # loops through all the photos in the search
-    for pid in photolist:
+    #for pid in photolist:
 
-    # for i in range(0, 1):
-    #
-    #     pid = photolist[i]
+    for i in range(0, 1):
+
+        pid = photolist[i]
 
         all_contexts = json.loads(flickrObj.photos.getAllContexts(photo_id=pid).decode(encoding='utf-8'))
         print(len(all_contexts))
@@ -223,6 +227,7 @@ def get_albums():
                 json.loads(flickrObj.photos.getInfo(photo_id=pid).decode(encoding='utf-8'))['photo']['owner'][
                     'nsid']
             # loops through all the sets that the photo is in
+
             for i in sets:
                 set_id = i["id"]
                 # if the album has not already been processed
@@ -233,7 +238,6 @@ def get_albums():
             print(albumlist)
         stopTime = time.time()
         duration = stopTime - startTime
-        print(duration)
     return albumlist
 
 
@@ -271,4 +275,10 @@ def add_photo_location(p):
     p.checkIfZoo()
 
 
-get_albums()
+albumList = get_albums()
+f = open("demofile.txt","w")
+for i in albumList:
+    albumList[i].print_album(f)
+    f.write('\n')
+
+f.close()

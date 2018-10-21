@@ -21,16 +21,16 @@ class Album:
         self.time_range_taken = time_range_taken
 
     def print_album(self, file):
-        file.write("'" + str(self.sid) +'"'+ ',')
-        file.write("'"  + str(self.url) +'"'+ ',')
-        file.write("'"  + str(self.user_id) +'"'+ ',')
-        file.write("'" + str(self.name)+'"'+ ',')
-        file.write("'" + str(self.size) +'"'+ ',')
-        file.write("'" + str( round(self.species_ratio,5)  )+'"'+ ',')
-        file.write("'" + str(self.soi) +'"'+ ',')
-        file.write("'" + str(self.photo_list) +'"'+ ',')
-        file.write("'" + str(    round(self.time_range_posted/60/60/24 ,5)   ) +'"'+ ',')
-        file.write("'" + str( round(self.time_range_taken/60/60/24, 5)   ) +'"'+ ',')
+        file.write("album_id: " + str(self.sid) +'"'+ '\n')
+        file.write("url: "  + str(self.url) +'"'+ '\n')
+        file.write("user_id: "  + str(self.user_id) +'"'+ '\n')
+        file.write("name: " + str(self.name)+'"'+ '\n')
+        file.write("album_size: " + str(self.size) +'"'+ '\n')
+        file.write("species_ratio" + str( round(self.species_ratio,5)  )+'"'+ '\n')
+        file.write("soi: " + str(self.soi) +'"'+ '\n')
+        file.write("photo_list" + str(self.photo_list) +'"'+ '\n')
+        file.write("time_range_posted" + str(    round(self.time_range_posted/60/60/24 ,5)   ) +'"'+ '\n')
+        file.write("time_range_taken" + str( round(self.time_range_taken/60/60/24, 5)   ) +'"'+ '\n')
 
 class Photo:
     def __init__(self,photo_info = {}, pos = -1, url = "", geotagged = False, photographer = "", tags = "", photo_description = "", locationX = -1, locationY = -1, timeTaken = -1, timePosted = -1, photoIfZoo = False, photoId = "", albumId = ""  ):
@@ -80,17 +80,17 @@ class Photo:
             return id_list.index(self.id)+1
 
     def print_photo(self, file):
-        file.write("'" + str(self.id) +'"'+ ',')
-        file.write('"' + str(self.url)+'"' + ',')
-        file.write('"'+ str(self.location) +'"'+ ',')
-        file.write('"' + str( round(self.timeDifference/60/60/24 ,5) ) + " days"+'"' + ',')
-        file.write('"'+ str(self.photographer) +'"'+ ',')
-        file.write('"'+ str(self.photoIfZoo)+'"' + ',')
-        file.write( '"'+ str(self.albumId) +'"'+ ',')
-        file.write('"'+ str(self.pos) +'"'+ ',')
-        file.write('"'+ str(self.photo_description) +'"'+ ',')
-        file.write('"'+ str(self.geotagged) +'"'+ ',')
-        file.write('"' + str(self.tags) +'"'+ ',')
+        file.write("'" + str(self.id) +'"'+ '\n')
+        file.write('"' + str(self.url)+'"' + '\n')
+        file.write('"'+ str(self.location) +'"'+ '\n')
+        file.write('"' + str( round(self.timeDifference/60/60/24 ,5) ) + " days"+'"' + '\n')
+        file.write('"'+ str(self.photographer) +'"'+ '\n')
+        file.write('"'+ str(self.photoIfZoo)+'"' + '\n')
+        file.write( '"'+ str(self.albumId) +'"'+ '\n')
+        file.write('"'+ str(self.pos) +'"'+ '\n')
+        file.write('"'+ str(self.photo_description) +'"'+ '\n')
+        file.write('"'+ str(self.geotagged) +'"'+ '\n')
+        file.write('"' + str(self.tags) +'"'+ '\n')
 
 
 
