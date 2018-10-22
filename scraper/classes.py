@@ -16,7 +16,7 @@ class Album:
         self.size = size #of album
         self.species_ratio = species_ratio #ratio of species of interest to total
         self.soi = species_ofInterest #species of interest
-        self.photo_list = photo_list #image ids
+        self.photo_list = {} #image ids
         self.time_range_posted = time_range_posted
         self.time_range_taken = time_range_taken
 
@@ -28,7 +28,7 @@ class Album:
         file.write("album_size: " + str(self.size) +'"'+ '\n')
         file.write("species_ratio" + str( round(self.species_ratio,5)  )+'"'+ '\n')
         file.write("soi: " + str(self.soi) +'"'+ '\n')
-        file.write("photo_list" + str(self.photo_list) +'"'+ '\n')
+        file.write("photo_list" + str(len(self.photo_list)) +'"'+ '\n')
         file.write("time_range_posted" + str(    round(self.time_range_posted/60/60/24 ,5)   ) +'"'+ '\n')
         file.write("time_range_taken" + str( round(self.time_range_taken/60/60/24, 5)   ) +'"'+ '\n')
 

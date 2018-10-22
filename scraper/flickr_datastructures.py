@@ -13,12 +13,15 @@ import requests, json, sys, string, time, flickrapi, pytz, webbrowser
 from getFlickrList import searchInFlickr
 from datetime import datetime, tzinfo
 from classes import Album, Photo
+import json
+
 
 key = "6ab5883201c84be19c9ceb0a4f5ba959"
 secret = "1d2bcde87f98ed92"
 
 global flickrObj
 flickrObj = flickrapi.FlickrAPI(key, secret, format="json")
+
 
 
 # pid refers to photo id, nsid is the user id
@@ -156,6 +159,16 @@ def get_album_details(set_id,user):
         # add_photo_url(newphoto)
         newphoto.url = photoInfo['photo']['urls']['url'][0]['_content']
         newphoto.photo_description = photoInfo['photo']['description']['_content']
+        if "location" in photoInfo["photo"]:
+            photolocation = photoInfo['photo']['location']
+            newphoto.photoLocationX = float(photolocation['latitude'])
+            newphoto.photoLocationY = float(photolocation['longitude'])
+            newphoto.location = (newphoto.photoLocationX, newphoto.photoLocationY)
+        else:
+            newphoto.location = 0;
+
+
+
         # add_photo_description(newphoto)
         # add_photo_location(newphoto)
 
@@ -184,7 +197,7 @@ def get_album_details(set_id,user):
         if posted > maxp:
             maxp = posted
         # adds the photo to the photolist attribute of the album object
-        newalbum.photo_list.append(j['id'])
+        newalbum.photo_list[j['id']] = newphoto
 
         album_size += 1
         stop = time.time()
@@ -203,6 +216,14 @@ def get_album_details(set_id,user):
     return newalbum
 
 
+def create_album_photo_map(albumList):
+    temp_dict = {}
+    for i in albumList:
+        temp_dict[i] = list(albumList[i].photo_list.keys())
+    with open('data.json', 'w') as fp:
+        json.dump(temp_dict, fp,indent=4)
+        #print(type(albumList[i].photo_list))
+
 # creates a list of albums that
 def get_albums():
     startTime = time.time()
@@ -214,7 +235,7 @@ def get_albums():
     # loops through all the photos in the search
     #for pid in photolist:
 
-    for i in range(0, 1):
+    for i in range(0, 2):
 
         pid = photolist[i]
 
@@ -236,6 +257,7 @@ def get_albums():
                     print(newalbum.photo_list)
                 albumlist[newalbum.sid] = newalbum
             print(albumlist)
+            create_album_photo_map(albumlist)
         stopTime = time.time()
         duration = stopTime - startTime
     return albumlist
