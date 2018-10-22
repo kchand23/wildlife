@@ -14,6 +14,7 @@ from getFlickrList import searchInFlickr
 from datetime import datetime, tzinfo
 from classes import Album, Photo
 import json
+import pickle
 
 
 key = "6ab5883201c84be19c9ceb0a4f5ba959"
@@ -235,7 +236,7 @@ def get_albums():
     # loops through all the photos in the search
     #for pid in photolist:
 
-    for i in range(0, 2):
+    for i in range(0, 1):
 
         pid = photolist[i]
 
@@ -257,9 +258,13 @@ def get_albums():
                     print(newalbum.photo_list)
                 albumlist[newalbum.sid] = newalbum
             print(albumlist)
-            create_album_photo_map(albumlist)
+
         stopTime = time.time()
         duration = stopTime - startTime
+    create_album_photo_map(albumlist)
+    pickle_out = open("dict.pickle", "wb")
+    pickle.dump(albumlist, pickle_out)
+    pickle_out.close()
     return albumlist
 
 
