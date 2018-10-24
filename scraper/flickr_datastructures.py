@@ -16,13 +16,11 @@ from classes import Album, Photo
 import json
 import pickle
 
-
 key = "6ab5883201c84be19c9ceb0a4f5ba959"
 secret = "1d2bcde87f98ed92"
 
 global flickrObj
 flickrObj = flickrapi.FlickrAPI(key, secret, format="json")
-
 
 
 # pid refers to photo id, nsid is the user id
@@ -110,8 +108,7 @@ def get_userdict():
     return user_dict
 
 
-def get_album_details(set_id,user):
-
+def get_album_details(set_id, user):
     # gets list of pictuers in the album
 
     photosets = json.loads(
@@ -168,8 +165,6 @@ def get_album_details(set_id,user):
         else:
             newphoto.location = 0;
 
-
-
         # add_photo_description(newphoto)
         # add_photo_location(newphoto)
 
@@ -222,8 +217,9 @@ def create_album_photo_map(albumList):
     for i in albumList:
         temp_dict[i] = list(albumList[i].photo_list.keys())
     with open('data.json', 'w') as fp:
-        json.dump(temp_dict, fp,indent=4)
-        #print(type(albumList[i].photo_list))
+        json.dump(temp_dict, fp, indent=4)
+        # print(type(albumList[i].photo_list))
+
 
 # creates a list of albums that
 def get_albums():
@@ -234,7 +230,7 @@ def get_albums():
     albumlist = {}  # {album id: album object}
 
     # loops through all the photos in the search
-    #for pid in photolist:
+    # for pid in photolist:
 
     for i in range(0, 1):
 
@@ -254,7 +250,7 @@ def get_albums():
                 set_id = i["id"]
                 # if the album has not already been processed
                 if set_id not in albumlist:
-                    newalbum = get_album_details(set_id,user)
+                    newalbum = get_album_details(set_id, user)
                     print(newalbum.photo_list)
                 albumlist[newalbum.sid] = newalbum
             print(albumlist)
@@ -302,10 +298,50 @@ def add_photo_location(p):
     p.checkIfZoo()
 
 
-albumList = get_albums()
-f = open("demofile.txt","w")
-for i in albumList:
-    albumList[i].print_album(f)
-    f.write('\n')
+def get_photo_dict(photo_id_list):
+    photoDict = {}
+    for i in photo_id_list:
+        photoDict[i] = {}
+        photoInfo = json.loads(flickrObj.photos.getInfo(photo_id=i).decode(encoding='utf-8'))
+        try:
+            photoInfo = json.loads(flickrObj.photos.getInfo(photo_id=i).decode(encoding='utf-8'))
+        except:
+            time.sleep(10)
+            photoInfo = json.loads(flickrObj.photos.getInfo(photo_id=i).decode(encoding='utf-8'))
+        if "photo" not in photoInfo:
+            continue
 
-f.close()
+        photoDict[i]["description"] = photoInfo['photo']['description']['_content']
+
+        if "location" in photoInfo["photo"]:
+            photolocation = photoInfo['photo']['location']
+            photoLocationX = float(photolocation['latitude'])
+            photoLocationY = float(photolocation['longitude'])
+            photoDict[i]["location"] = (photoLocationX, photoLocationY)
+        else:
+            photoDict[i]["location"] = (-1, -1)
+
+        all_contexts = json.loads(flickrObj.photos.getAllContexts(photo_id=i).decode(encoding='utf-8'))
+        if 'set' in all_contexts:
+            photoDict[i]["albumList"] = {}
+            sets = all_contexts["set"]
+            user = \
+                json.loads(flickrObj.photos.getInfo(photo_id=i).decode(encoding='utf-8'))['photo']['owner'][
+                    'nsid']
+            for j in sets:
+
+                set_id = j["id"]
+                photoDict[i]["albumList"][set_id] = {}
+                # if the album has not already been processed
+                photosets = json.loads(
+                    flickrObj.photosets.getInfo(photoset_id=set_id, user_id=user).decode(encoding='utf-8'))
+                photoDict[i]["albumList"][set_id]["name"] = photosets['photoset']['title']['_content']
+                photoDict[i]["albumList"][set_id]["description"] = photosets['photoset']['description']['_content']
+        taken = photoInfo['photo']['dates']['taken']
+        # converts the text time into unix timestamp
+        taken = datetime.strptime(taken, '%Y-%m-%d %H:%M:%S')
+        # print(type(taken))
+        taken = int(time.mktime(taken.timetuple()))
+        photoDict[i]["time_taken"] = taken
+        photoDict[i]["time_uploaded"] = int(photoInfo['photo']['dates']['posted'])
+    return photoDict
