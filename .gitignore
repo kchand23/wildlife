@@ -1,5 +1,9 @@
 .DS_store
+_pycache_
 settings.py
-mturk.json
-test.py
-mturk/trash/*
+trash
+/data/
+/settings/
+.id
+/scraper/data/
+.idea

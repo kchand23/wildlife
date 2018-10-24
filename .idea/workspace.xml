@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="54382101-6cb2-4904-8356-1096dbf49eba" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scraper/flickr_datastructures.py" beforeDir="false" afterPath="$PROJECT_DIR$/scraper/flickr_datastructures.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -28,14 +27,14 @@
         <counts>
           <entry key="all_ids" value="1" />
           <entry key="all_urls" value="1" />
-          <entry key="json" value="1" />
+          <entry key="json" value="2" />
           <entry key="py" value="7" />
           <entry key="txt" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="JSON" value="1" />
+          <entry key="JSON" value="2" />
           <entry key="PLAIN_TEXT" value="3" />
           <entry key="Python" value="7" />
         </counts>
@@ -43,12 +42,12 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="394" />
-          <entry key="py" value="2383" />
+          <entry key="py" value="2417" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="2777" />
+          <entry key="Python" value="2811" />
         </counts>
       </usages-collector>
     </session>
@@ -63,22 +62,20 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scraper/flickr_datastructures.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="425">
-              <caret line="354" column="44" selection-start-line="354" selection-start-column="44" selection-end-line="354" selection-end-column="44" />
+            <state relative-caret-position="1076">
+              <caret line="347" lean-forward="true" selection-start-line="347" selection-end-line="347" />
               <folding>
                 <element signature="e#194#263#0" expanded="true" />
-                <marker date="1540342600796" expanded="true" signature="3263:7685" ph="..." />
+                <marker date="1540342838943" expanded="true" signature="3263:7685" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scraper/data.json">
+        <entry file="file://$PROJECT_DIR$/scraper/photoDict.json">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3234">
-              <caret line="154" column="21" selection-start-line="154" selection-start-column="21" selection-end-line="154" selection-end-column="21" />
-            </state>
+            <state relative-caret-position="-1360" />
           </provider>
         </entry>
       </file>
@@ -419,13 +416,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/scraper/photoDict.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1360" />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/scraper/flickr_datastructures.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="354" column="44" selection-start-line="354" selection-start-column="44" selection-end-line="354" selection-end-column="44" />
+        <state relative-caret-position="1076">
+          <caret line="347" lean-forward="true" selection-start-line="347" selection-end-line="347" />
           <folding>
             <element signature="e#194#263#0" expanded="true" />
-            <marker date="1540342600796" expanded="true" signature="3263:7685" ph="..." />
+            <marker date="1540342838943" expanded="true" signature="3263:7685" ph="..." />
           </folding>
         </state>
       </provider>
