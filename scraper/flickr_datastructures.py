@@ -302,7 +302,6 @@ def get_photo_dict(photo_id_list):
     photoDict = {}
     for i in photo_id_list:
         photoDict[i] = {}
-        photoInfo = json.loads(flickrObj.photos.getInfo(photo_id=i).decode(encoding='utf-8'))
         try:
             photoInfo = json.loads(flickrObj.photos.getInfo(photo_id=i).decode(encoding='utf-8'))
         except:
