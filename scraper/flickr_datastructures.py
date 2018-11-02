@@ -232,7 +232,7 @@ def get_albums():
     # loops through all the photos in the search
     # for pid in photolist:
 
-    for i in range(0, 1):
+    for i in range(0, 10):
 
         pid = photolist[i]
 
@@ -302,7 +302,6 @@ def get_photo_dict(photo_id_list):
     photoDict = {}
     for i in photo_id_list:
         photoDict[i] = {}
-        photoInfo = json.loads(flickrObj.photos.getInfo(photo_id=i).decode(encoding='utf-8'))
         try:
             photoInfo = json.loads(flickrObj.photos.getInfo(photo_id=i).decode(encoding='utf-8'))
         except:
@@ -345,3 +344,33 @@ def get_photo_dict(photo_id_list):
         photoDict[i]["time_taken"] = taken
         photoDict[i]["time_uploaded"] = int(photoInfo['photo']['dates']['posted'])
     return photoDict
+
+def create_json_file(filename):
+    with open('dict.pickle', 'rb') as input:
+        albumObjDict = pickle.load(input)
+    albumDict = {}
+    for i in albumObjDict:
+        albumDict[albumObjDict[i].sid] = {}
+        albumDict[albumObjDict[i].sid]["url"] = albumObjDict[i].url
+        albumDict[albumObjDict[i].sid]["user_id"] = albumObjDict[i].user_id
+        albumDict[albumObjDict[i].sid]["name"] = albumObjDict[i].name
+        albumDict[albumObjDict[i].sid]["size"] = albumObjDict[i].size
+        albumDict[albumObjDict[i].sid]["time_range_posted"] = albumObjDict[i].time_range_posted
+        albumDict[albumObjDict[i].sid]["time_range_taken"] = albumObjDict[i].time_range_taken
+        albumDict[albumObjDict[i].sid]["photo_list"] = []
+        for j in albumObjDict[i].photo_list:
+            temp_dict = {}
+            temp_dict["id"] = albumObjDict[i].photo_list[j].url.split('/')[-2]
+            temp_dict["location"] = albumObjDict[i].photo_list[j].location
+            temp_dict["time_taken"] = albumObjDict[i].photo_list[j].timeTaken
+            temp_dict["time_posted"] = albumObjDict[i].photo_list[j].timePosted
+            temp_dict["photographer"] = albumObjDict[i].photo_list[j].photographer
+            temp_dict["url"] = albumObjDict[i].photo_list[j].url
+            temp_dict["description"] = albumObjDict[i].photo_list[j].photo_description
+            albumDict[albumObjDict[i].sid]["photo_list"].append(temp_dict)
+
+    with open(filename, 'w') as outfile:
+        outfile.write(json.dumps(albumDict, indent=4))
+
+create_json_file("albumDict.json")
+
