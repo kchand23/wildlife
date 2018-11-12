@@ -1,0 +1,74 @@
+import json
+import pickle
+import os
+key = "6ab5883201c84be19c9ceb0a4f5ba959"
+secret = "1d2bcde87f98ed92"
+import requests, json, sys, string, time, flickrapi, pytz, webbrowser
+from getFlickrList import searchInFlickr
+global flickrObj
+flickrObj = flickrapi.FlickrAPI(key, secret, format="json")
+
+
+with open("album_classification.json","r") as fp:
+    filtered_dict = json.load(fp)
+
+with open("dict.pickle", "rb") as input_file:
+   e = pickle.load(input_file)
+
+count = 0
+album_modified_dict = {}
+la = 0
+for i in filtered_dict:
+    if filtered_dict[i] == "yes":
+        if i in e:
+            if len(e[i].photo_list) < 300:
+                la += len(e[i].photo_list)
+# import urllib
+
+# print(la)
+# for i in filtered_dict:
+#     if filtered_dict[i] == "yes":
+#         if i in e:
+#             if len(e[i].photo_list) < 300:
+#                 album_modified_dict[i] = [];
+#                 for j in e[i].photo_list:
+#                      photo_id = e[i].photo_list[j].url.split("/")[-2]
+#                      try:
+#                         temp_dict = json.loads(flickrObj.photos.getSizes(photo_id=photo_id).decode(encoding='utf-8'))
+#                      except:
+#                          time.sleep(10)
+#                          temp_dict = json.loads(flickrObj.photos.getSizes(photo_id=photo_id).decode(encoding='utf-8'))
+#                      album_modified_dict[i].append(temp_dict["sizes"]["size"][-3]["source"])
+#                      print(count)
+#                      count+=1
+#                  #print(photo_id)
+#          #count += len(e[i].photo_list)
+
+# print(album_modified_dict)
+# with open("urls.json","w") as fp:
+#     fp.write(json.dumps(album_modified_dict,indent=4))
+import urllib
+
+import urllib.request
+
+with open("urls.json","r") as fp:
+    url_dict = json.load(fp)
+
+
+
+# for i in url_dict:
+#     if not os.path.exists(i):
+#         os.makedirs(i)
+#     for j in url_dict[i]:
+#         print(count)
+#         try:
+#             urllib.request.urlretrieve(j, str(i) + "/" + j.split("/")[-1])
+#             count+=1
+#         except:
+#             continue
+lst = []
+for i in url_dict:
+    for j in os.listdir(i):
+        print(j.split("_")[0])
+        os.rename(i + "\\"+ j,i + "\\" + j+".jpg")
+

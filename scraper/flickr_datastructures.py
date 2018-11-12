@@ -372,5 +372,3 @@ def create_json_file(filename):
     with open(filename, 'w') as outfile:
         outfile.write(json.dumps(albumDict, indent=4))
 
-create_json_file("albumDict.json")
-
