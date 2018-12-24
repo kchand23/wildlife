@@ -9,66 +9,61 @@ global flickrObj
 flickrObj = flickrapi.FlickrAPI(key, secret, format="json")
 
 
-with open("album_classification.json","r") as fp:
-    filtered_dict = json.load(fp)
+# with open("album_classification.json","r") as fp:
+#     filtered_dict = json.load(fp)
+def get_urls():
+    with open("dict33.pickle", "rb") as input_file:
+       e = pickle.load(input_file)
 
-with open("dict.pickle", "rb") as input_file:
-   e = pickle.load(input_file)
+    count = 0
+    album_modified_dict = {}
+    import urllib
 
-count = 0
-album_modified_dict = {}
-la = 0
-for i in filtered_dict:
-    if filtered_dict[i] == "yes":
-        if i in e:
-            if len(e[i].photo_list) < 300:
-                la += len(e[i].photo_list)
-# import urllib
+    for i in e:
+        print(len(e[i].photo_list))
+        album_modified_dict[i] = []
+        for j in e[i].photo_list:
+             photo_id = e[i].photo_list[j].url.split("/")[-2]
+             try:
+                temp_dict = json.loads(flickrObj.photos.getSizes(photo_id=photo_id).decode(encoding='utf-8'))
+             except:
+                 time.sleep(10)
+                 temp_dict = json.loads(flickrObj.photos.getSizes(photo_id=photo_id).decode(encoding='utf-8'))
+             #change this to get different quality of picture
+             album_modified_dict[i].append(temp_dict["sizes"]["size"][-3]["source"])
+             print(count)
+             count+=1
 
-# print(la)
-# for i in filtered_dict:
-#     if filtered_dict[i] == "yes":
-#         if i in e:
-#             if len(e[i].photo_list) < 300:
-#                 album_modified_dict[i] = [];
-#                 for j in e[i].photo_list:
-#                      photo_id = e[i].photo_list[j].url.split("/")[-2]
-#                      try:
-#                         temp_dict = json.loads(flickrObj.photos.getSizes(photo_id=photo_id).decode(encoding='utf-8'))
-#                      except:
-#                          time.sleep(10)
-#                          temp_dict = json.loads(flickrObj.photos.getSizes(photo_id=photo_id).decode(encoding='utf-8'))
-#                      album_modified_dict[i].append(temp_dict["sizes"]["size"][-3]["source"])
-#                      print(count)
-#                      count+=1
-#                  #print(photo_id)
-#          #count += len(e[i].photo_list)
+    print(album_modified_dict)
 
-# print(album_modified_dict)
-# with open("urls.json","w") as fp:
-#     fp.write(json.dumps(album_modified_dict,indent=4))
+    #write urls to a file.
+    with open("urls.json","w") as fp:
+        fp.write(json.dumps(album_modified_dict,indent=4))
+
+
 import urllib
 
 import urllib.request
+def download_pictures():
+    with open("urls.json","r") as fp:
+        url_dict = json.load(fp)
 
-with open("urls.json","r") as fp:
-    url_dict = json.load(fp)
 
 
-
-# for i in url_dict:
-#     if not os.path.exists(i):
-#         os.makedirs(i)
-#     for j in url_dict[i]:
-#         print(count)
-#         try:
-#             urllib.request.urlretrieve(j, str(i) + "/" + j.split("/")[-1])
-#             count+=1
-#         except:
-#             continue
-lst = []
-for i in url_dict:
-    for j in os.listdir(i):
-        print(j.split("_")[0])
-        os.rename(i + "\\"+ j,i + "\\" + j+".jpg")
+    for i in url_dict:
+        if not os.path.exists(i):
+            os.makedirs(i)
+        for j in url_dict[i]:
+            try:
+                urllib.request.urlretrieve(j, str(i) + "/" + j.split("/")[-1])
+            except:
+                continue
+def rename_pictures():
+    with open("urls.json","r") as fp:
+        url_dict = json.load(fp)
+        
+    for i in url_dict:
+        for j in os.listdir(i):
+            print(j.split("_")[0])
+            os.rename(i + "\\"+ j,i + "\\" + j.split("_")[0]+".jpg")
 
